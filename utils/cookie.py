@@ -3,8 +3,8 @@ import json
 from loguru import logger
 from datetime import datetime
 
-from encrypt import loginEncrypt
-from db import DatabaseManager
+from utils.encrypt import loginEncrypt
+from utils.db import DatabaseManager
 
 LOGIN_HEADER = {
         'Accept': 'application/json, text/javascript, */*; q=0.01',
