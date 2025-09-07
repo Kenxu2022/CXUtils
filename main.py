@@ -5,8 +5,10 @@ from pydantic import BaseModel
 from typing import Annotated
 from configparser import ConfigParser
 
-from credentials.cookie import initializeCookie, deleteCookie
+from credentials.cookie import initializeCookie, getCookie, deleteCookie
 from auth import createToken,validateToken
+from api import ChaoxingAPI
+from utils.parse import parseCourse, parseActivity
 
 class Token(BaseModel):
     access_token: str
@@ -20,12 +22,14 @@ app = FastAPI(docs_url=None, redoc_url=None)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 async def getUser(token: Annotated[str, Depends(oauth2_scheme)]):
-    if not validateToken(token):
+    user = validateToken(token)
+    if not user:
         raise HTTPException(
             status_code = status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    return user
 
 @app.post("/token")
 def userAuth(credential: Annotated[OAuth2PasswordRequestForm, Depends()]):
@@ -53,5 +57,17 @@ def deleteCredential(username: str = Body(..., embed=True), _ = Depends(getUser)
     result = deleteCookie(username)
     return result
 
+@app.post("/getCourse")
+def getCourse(username: str = Body(..., embed=True), _ = Depends(getUser)):
+    cookie = getCookie(username).get("cookie")
+    result = ChaoxingAPI(cookie).getCourse()
+    return parseCourse(result)
+
+@app.post("/getActivity")
+def getActivity(username: str = Body(...), courseID: str = Body(...), classID: str = Body(...), _ = Depends(getUser)):
+    cookie = getCookie(username).get("cookie")
+    result = ChaoxingAPI(cookie).getActivity(courseID, classID)
+    return parseActivity(result)
+
 if __name__ == "__main__":
-    uvicorn.run(app, host=listenIP, port=listenPort)
+    uvicorn.run(app, host = listenIP, port = listenPort)

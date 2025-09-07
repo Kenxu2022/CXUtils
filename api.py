@@ -1,8 +1,5 @@
 import requests
 import json
-import re
-from uuid import uuid4
-from urllib.parse import quote
 
 HEADER = {
         'Accept': '*/*',
@@ -35,47 +32,3 @@ class ChaoxingAPI:
         }
         response = requests.get(url, headers = HEADER, params = data, cookies = self.cookie)
         return json.loads(response.text)
-    def getQuestion(self, activeId: str):
-        url = "https://mobilelearn.chaoxing.com/v2/apis/discuss/getTopicDiscussInfo"
-        data = {
-            'activeId': activeId
-        }
-        response = requests.get(url, headers = HEADER, params = data, cookies = self.cookie)
-        responseData = response.json()
-        questionUUID = responseData['data']['uuid']
-        url = f"https://groupweb.chaoxing.com/course/topicDiscuss/{questionUUID}/getTopic"
-        response = requests.get(url, headers = HEADER, cookies = self.cookie)
-        responseData = response.json()
-        question = responseData['datas']['text_content']
-        publicURL = responseData['datas']['shareUrl']
-        uuid = responseData['datas']['uuid']
-        bbsid = responseData['datas']['bbsid']
-        return question, publicURL, uuid, bbsid
-    def getReply(self, uuid: str, bbsid: str):
-        url = f"https://sharewh1.xuexi365.com/share/topic/{bbsid}/{uuid}/replys.json"
-        response = requests.get(url, headers = HEADER, cookies = self.cookie)
-        return response.json()
-    def _getURLToken(self, uuid: str):
-        url = "https://groupweb.chaoxing.com/course/topicDiscuss/info"
-        data = {
-            'uuid': uuid
-        }
-        response = requests.get(url, headers = HEADER, params = data, cookies = self.cookie)
-        htmlContent = response.text
-        pattern = r"urlToken:'([^']+)'"
-        urlToken = re.search(pattern, htmlContent).group(1)
-        return urlToken
-    def sendReply(self, uuid: str, courseId: str, classId: str, content: str, bbsid: str):
-        url = f"https://groupweb.chaoxing.com/pc/invitation/{uuid}/addReplys"
-        data = {
-            'courseId': courseId,
-            'classId': classId,
-            'replyId': -1,
-            'uuid': uuid4(),
-            'topic_content': quote(content),
-            'urlToken': self._getURLToken(uuid),
-            'bbsid': bbsid,
-            'anonymous': ""
-        }
-        response = requests.post(url, headers = HEADER, data = data, cookies = self.cookie)
-        return response.json()
