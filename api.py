@@ -34,28 +34,26 @@ class ChaoxingAPI:
         return json.loads(response.text)
     
 class SignIn:
-    def __init__(self, courseId, classId, activeId, cookie, validate=""):
-        self.courseId = courseId
-        self.classId = classId
+    def __init__(self, activeId, cookie, validate = ""):
         self.activeId = activeId
         self.cookie = cookie
         self.validate = validate
     def normalSignIn(self):
         url = f"https://mobilelearn.chaoxing.com/pptSign/stuSignajax?activeId={self.activeId}&validate={self.validate}"
         response = requests.get(url, headers = HEADER, cookies = self.cookie)
-        return response
+        return response.text
     def locationSignIn(self, locationText, locationLatitude, locationLongitude):
         url = f"https://mobilelearn.chaoxing.com/pptSign/stuSignajax?address={locationText}&activeId={self.activeId}&latitude={locationLatitude}&longitude={locationLongitude}&validate={self.validate}&fid=0&appType=15&ifTiJiao=1"
         response = requests.get(url, headers = HEADER, cookies = self.cookie)
-        return response
+        return response.text
     def qrcodeSignIn(self, enc):
         url = f"https://mobilelearn.chaoxing.com/pptSign/stuSignajax?activeId={self.activeId}&enc={enc}&validate={self.validate}&fid=0"
         response = requests.get(url, headers = HEADER, cookies = self.cookie)
-        return response
+        return response.text
     def signcodeSignIn(self, signcode):
         url = f"https://mobilelearn.chaoxing.com/v2/apis/sign/signIn?activeId={self.activeId}&signCode={signcode}&validate={self.validate}&moreClassAttendEnc="
         response = requests.get(url, headers = HEADER, cookies = self.cookie)
-        return response
+        return response.text
     def getMiscInfo(self):
         url = f"https://mobilelearn.chaoxing.com/v2/apis/active/getPPTActiveInfo?activeId={self.activeId}"
         response = requests.get(url, headers = HEADER, cookies = self.cookie)

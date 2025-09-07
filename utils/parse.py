@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 import time
+import json
 
 class parseCourseResult(BaseModel):
     name: str
@@ -62,3 +63,28 @@ def parseSignInDetail(data: dict):
         "success": True,
         "detail": signInDetail
     }
+
+def parseSignIn(data: str):
+    if data == "success":
+        return {
+            "success": True,
+            "detail": None
+        }
+    else:
+        try: 
+            data = json.loads(data)
+            if data['result'] == 1:
+                return {
+                    "success": True,
+                    "detail": None
+                }
+            else:
+                {
+                    "success": False,
+                    "detail": data
+                }
+        except:
+            return {
+                "success": False,
+                "detail": data
+            }

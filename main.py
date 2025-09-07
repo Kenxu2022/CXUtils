@@ -8,7 +8,7 @@ from configparser import ConfigParser
 from credentials.cookie import initializeCookie, getCookie, deleteCookie
 from auth import createToken,validateToken
 from api import ChaoxingAPI, SignIn
-from utils.parse import parseCourse, parseActivity, parseSignInDetail
+from utils.parse import parseCourse, parseActivity, parseSignInDetail, parseSignIn
 
 class Token(BaseModel):
     access_token: str
@@ -77,14 +77,57 @@ def getActivity(
 @app.post("/getSignInDetail")
 def getSignInDetail(
     username: str = Body(...), 
-    courseID: str = Body(...), 
-    classID: str = Body(...), 
     activeID: str = Body(...),
     _ = Depends(getUser)
 ):
     cookie = getCookie(username).get("cookie")
-    result = SignIn(courseID, classID, activeID, cookie).getMiscInfo()
+    result = SignIn(activeID, cookie).getMiscInfo()
     return parseSignInDetail(result)
+
+@app.post("/normalSignIn")
+def normalSignIn(
+    username: str = Body(...), 
+    activeID: str = Body(...),
+    _ = Depends(getUser)
+):
+    cookie = getCookie(username).get("cookie")
+    result = SignIn(activeID, cookie).normalSignIn()
+    return parseSignIn(result)
+
+@app.post("/locationSignIn")
+def locationSignIn(
+    username: str = Body(...), 
+    activeID: str = Body(...),
+    locationText: str = Body(...),
+    locationLatitude: str = Body(...),
+    locationLongitude: str = Body(...),
+    _ = Depends(getUser)
+):
+    cookie = getCookie(username).get("cookie")
+    result = SignIn(activeID, cookie).locationSignIn(locationText, locationLatitude, locationLongitude)
+    return parseSignIn(result)
+
+@app.post("/qrcodeSignIn")
+def qrcodeSignIn(
+    username: str = Body(...), 
+    activeID: str = Body(...),
+    enc: str = Body(...),
+    _ = Depends(getUser)
+):
+    cookie = getCookie(username).get("cookie")
+    result = SignIn(activeID, cookie).qrcodeSignIn(enc)
+    return parseSignIn(result)
+
+@app.post("/signcodeSignIn")
+def signcodeSignIn(
+    username: str = Body(...), 
+    activeID: str = Body(...),
+    signCode: str = Body(...),
+    _ = Depends(getUser)
+):
+    cookie = getCookie(username).get("cookie")
+    result = SignIn(activeID, cookie).signcodeSignIn(signCode)
+    return parseSignIn(result)
 
 if __name__ == "__main__":
     uvicorn.run(app, host = listenIP, port = listenPort)
