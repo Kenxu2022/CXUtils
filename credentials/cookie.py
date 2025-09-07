@@ -71,3 +71,7 @@ def getCookie(username: str):
 def deleteCookie(username: str):
     with DatabaseManager() as dbManager:
         dbManager.deleteCookie(username)
+    return {
+        "success": True,
+        "detail": None
+    }

@@ -1,11 +1,11 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, Body
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 import uvicorn
 from pydantic import BaseModel
 from typing import Annotated
 from configparser import ConfigParser
 
-from credentials.cookie import initializeCookie
+from credentials.cookie import initializeCookie, deleteCookie
 from auth import createToken,validateToken
 
 class Token(BaseModel):
@@ -43,9 +43,14 @@ def userAuth(credential: Annotated[OAuth2PasswordRequestForm, Depends()]):
         )
 
 @app.post("/addCredential")
-def addCredential(credential: Annotated[OAuth2PasswordRequestForm, Depends()], _: Annotated[None, Depends(getUser)]):
-    result = initializeCookie(credential.username, credential.password, False)
+def addCredential(username: str = Body(...), password: str = Body(...), _ = Depends(getUser)):
+    result = initializeCookie(username, password, False)
     result.pop('cookie')
+    return result
+
+@app.post("/deleteCredential")
+def deleteCredential(username: str = Body(..., embed=True), _ = Depends(getUser)):
+    result = deleteCookie(username)
     return result
 
 if __name__ == "__main__":
