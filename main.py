@@ -7,8 +7,8 @@ from configparser import ConfigParser
 
 from credentials.cookie import initializeCookie, getCookie, deleteCookie
 from auth import createToken,validateToken
-from api import ChaoxingAPI
-from utils.parse import parseCourse, parseActivity
+from api import ChaoxingAPI, SignIn
+from utils.parse import parseCourse, parseActivity, parseSignInDetail
 
 class Token(BaseModel):
     access_token: str
@@ -64,10 +64,27 @@ def getCourse(username: str = Body(..., embed=True), _ = Depends(getUser)):
     return parseCourse(result)
 
 @app.post("/getActivity")
-def getActivity(username: str = Body(...), courseID: str = Body(...), classID: str = Body(...), _ = Depends(getUser)):
+def getActivity(
+    username: str = Body(...), 
+    courseID: str = Body(...), 
+    classID: str = Body(...), 
+    _ = Depends(getUser)
+):
     cookie = getCookie(username).get("cookie")
     result = ChaoxingAPI(cookie).getActivity(courseID, classID)
     return parseActivity(result)
+
+@app.post("/getSignInDetail")
+def getSignInDetail(
+    username: str = Body(...), 
+    courseID: str = Body(...), 
+    classID: str = Body(...), 
+    activeID: str = Body(...),
+    _ = Depends(getUser)
+):
+    cookie = getCookie(username).get("cookie")
+    result = SignIn(courseID, classID, activeID, cookie).getMiscInfo()
+    return parseSignInDetail(result)
 
 if __name__ == "__main__":
     uvicorn.run(app, host = listenIP, port = listenPort)
