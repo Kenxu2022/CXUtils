@@ -6,7 +6,7 @@ from datetime import datetime, timezone, timedelta
 from uuid import uuid4
 from loguru import logger
 
-SECERT_KEY = str(uuid4())
+SECERT_KEY = os.getenv("SECERT_KEY", str(uuid4()))
 ALGORITHM = "HS256"
 
 conf = ConfigParser()
