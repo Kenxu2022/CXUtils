@@ -4,6 +4,7 @@ import uvicorn
 from pydantic import BaseModel
 from typing import Annotated, Optional
 from configparser import ConfigParser
+from ddddocr import DdddOcr
 from loguru import logger
 import time
 
@@ -21,6 +22,7 @@ conf = ConfigParser()
 conf.read('config.ini')
 listenIP = conf['API']['ListenIP']
 listenPort = int(conf['API']['Port'])
+parseCaptcha = DdddOcr(show_ad=False, det=False, ocr=False)
 app = FastAPI(docs_url=None, redoc_url=None)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -107,7 +109,7 @@ def getValidateCode(
         # get captcha token and picture
         captchaToken, slideImage, backgroundImage = parseCaptchaImageUrl(captchaInstance.getCaptcha(captchaKey, token, iv, timestamp))
         # get x coordinate
-        xCoordinate = getCoordinate(captchaInstance.getImage(slideImage), captchaInstance.getImage(backgroundImage))
+        xCoordinate = getCoordinate(parseCaptcha, captchaInstance.getImage(slideImage), captchaInstance.getImage(backgroundImage))
         time.sleep(0.5)
         # get validation code
         validateCode = parseValidateCode(captchaInstance.getAuth(captchaToken, xCoordinate, iv, timestamp))
