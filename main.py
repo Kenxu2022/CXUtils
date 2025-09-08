@@ -2,13 +2,16 @@ from fastapi import FastAPI, Depends, HTTPException, status, Body
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 import uvicorn
 from pydantic import BaseModel
-from typing import Annotated
+from typing import Annotated, Optional
 from configparser import ConfigParser
+from loguru import logger
+import time
 
 from credentials.cookie import initializeCookie, getCookie, deleteCookie
 from auth import createToken,validateToken
-from api import ChaoxingAPI, SignIn
-from utils.parse import parseCourse, parseActivity, parseSignInDetail, parseSignIn
+from api import ChaoxingAPI, SignIn, Captcha
+from utils.parse import parseCourse, parseActivity, parseSignInDetail, parseSignIn, parseServerTime, parseCaptchaImageUrl, parseValidateCode
+from utils.captcha import getCaptchaParam, getCoordinate
 
 class Token(BaseModel):
     access_token: str
@@ -84,14 +87,49 @@ def getSignInDetail(
     result = SignIn(activeID, cookie).getMiscInfo()
     return parseSignInDetail(result)
 
-@app.post("/normalSignIn")
-def normalSignIn(
+@app.post("/getValidateCode")
+def getValidateCode(
     username: str = Body(...), 
+    courseID: str = Body(...), 
+    classID: str = Body(...), 
     activeID: str = Body(...),
     _ = Depends(getUser)
 ):
     cookie = getCookie(username).get("cookie")
-    result = SignIn(activeID, cookie).normalSignIn()
+    captchaInstance = Captcha(cookie, courseID, classID, activeID)
+    for i in range(4):
+        # get server time
+        serverTime = parseServerTime(captchaInstance.getServerTime())
+        # get current time
+        timestamp = int(time.time() * 1000)
+        # get parameters to obtain captcha picture
+        captchaKey, token, iv = getCaptchaParam(serverTime, timestamp)
+        # get captcha token and picture
+        captchaToken, slideImage, backgroundImage = parseCaptchaImageUrl(captchaInstance.getCaptcha(captchaKey, token, iv, timestamp))
+        # get x coordinate
+        xCoordinate = getCoordinate(captchaInstance.getImage(slideImage), captchaInstance.getImage(backgroundImage))
+        time.sleep(0.5)
+        # get validation code
+        validateCode = parseValidateCode(captchaInstance.getAuth(captchaToken, xCoordinate, iv, timestamp))
+        if validateCode:
+            logger.info("通过验证码校验")
+            return validateCode
+        logger.warning(f"未通过验证码校验，次数：第{i + 1}次")
+    logger.error("连续五次失败，终止")
+    return {
+        "success":False,
+        "code": None
+    }
+
+@app.post("/normalSignIn")
+def normalSignIn(
+    username: str = Body(...),
+    activeID: str = Body(...),
+    validate: Optional[str] = Body(""),
+    _ = Depends(getUser)
+):
+    cookie = getCookie(username).get("cookie")
+    result = SignIn(activeID, cookie, validate).normalSignIn()
     return parseSignIn(result)
 
 @app.post("/locationSignIn")
@@ -101,10 +139,11 @@ def locationSignIn(
     locationText: str = Body(...),
     locationLatitude: str = Body(...),
     locationLongitude: str = Body(...),
+    validate: Optional[str] = Body(""),
     _ = Depends(getUser)
 ):
     cookie = getCookie(username).get("cookie")
-    result = SignIn(activeID, cookie).locationSignIn(locationText, locationLatitude, locationLongitude)
+    result = SignIn(activeID, cookie, validate).locationSignIn(locationText, locationLatitude, locationLongitude)
     return parseSignIn(result)
 
 @app.post("/qrcodeSignIn")
@@ -112,10 +151,11 @@ def qrcodeSignIn(
     username: str = Body(...), 
     activeID: str = Body(...),
     enc: str = Body(...),
+    validate: Optional[str] = Body(""),
     _ = Depends(getUser)
 ):
     cookie = getCookie(username).get("cookie")
-    result = SignIn(activeID, cookie).qrcodeSignIn(enc)
+    result = SignIn(activeID, cookie, validate).qrcodeSignIn(enc)
     return parseSignIn(result)
 
 @app.post("/signcodeSignIn")
@@ -123,10 +163,11 @@ def signcodeSignIn(
     username: str = Body(...), 
     activeID: str = Body(...),
     signCode: str = Body(...),
+    validate: Optional[str] = Body(""),
     _ = Depends(getUser)
 ):
     cookie = getCookie(username).get("cookie")
-    result = SignIn(activeID, cookie).signcodeSignIn(signCode)
+    result = SignIn(activeID, cookie, validate).signcodeSignIn(signCode)
     return parseSignIn(result)
 
 if __name__ == "__main__":

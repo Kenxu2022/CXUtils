@@ -88,3 +88,34 @@ def parseSignIn(data: str):
                 "success": False,
                 "detail": data
             }
+
+def parseServerTime(data: str):
+    # remove cx_captcha_function()
+    json_start = data.find("(") + 1
+    json_end = data.rfind(")")
+    data = json.loads(data[json_start:json_end])
+    return data['t']
+
+def parseCaptchaImageUrl(data: str):
+    # remove cx_captcha_function()
+    jsonStart = data.find("(") + 1
+    jsonEnd = data.rfind(")")
+    data = json.loads(data[jsonStart:jsonEnd])
+    token = data["token"]
+    slideImage = data["imageVerificationVo"]["cutoutImage"]
+    backgroundImage = data["imageVerificationVo"]["shadeImage"]
+    return [token, slideImage, backgroundImage]
+
+def parseValidateCode(data: str):
+    # remove cx_captcha_function()
+    jsonStart = data.find("(") + 1
+    jsonEnd = data.rfind(")")
+    authData = json.loads(data[jsonStart:jsonEnd])
+    if authData['result'] == True:
+        validate = json.loads(authData['extraData'])['validate']
+        return {
+            "success": True,
+            "code": validate
+        }
+    else:
+        return None

@@ -3,3 +3,4 @@ loguru
 pycryptodome
 fastapi[standard]
 pyjwt
+ddddocr
