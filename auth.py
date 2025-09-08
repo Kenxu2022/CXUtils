@@ -1,5 +1,6 @@
 from configparser import ConfigParser
 import jwt
+import os
 # from jwt.exceptions import InvalidTokenError
 from datetime import datetime, timezone, timedelta
 from uuid import uuid4
@@ -10,8 +11,8 @@ ALGORITHM = "HS256"
 
 conf = ConfigParser()
 conf.read('config.ini')
-username = conf['Auth']['Username']
-password = conf['Auth']['Password']
+username = os.getenv("USERNAME", conf['Auth']['Username'])
+password = os.getenv("PASSWORD", conf['Auth']['Password'])
 
 def createToken(usernameFromClient: str, passwordFromClient: str):
     if (usernameFromClient == username and passwordFromClient == password):

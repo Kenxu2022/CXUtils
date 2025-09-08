@@ -7,6 +7,7 @@ from configparser import ConfigParser
 from ddddocr import DdddOcr
 from loguru import logger
 import time
+import os
 
 from credentials.cookie import initializeCookie, getCookie, deleteCookie
 from auth import createToken,validateToken
@@ -20,8 +21,8 @@ class Token(BaseModel):
 
 conf = ConfigParser()
 conf.read('config.ini')
-listenIP = conf['API']['ListenIP']
-listenPort = int(conf['API']['Port'])
+listenIP = os.getenv("LISTEN_IP", conf['API']['ListenIP'])
+listenPort = int(os.getenv("LISTEN_PORT", conf['API']['Port']))
 parseCaptcha = DdddOcr(show_ad=False, det=False, ocr=False)
 app = FastAPI(docs_url=None, redoc_url=None)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
