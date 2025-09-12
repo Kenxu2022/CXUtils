@@ -32,6 +32,32 @@ pip install -r requirements.txt
 python main.py
 ```
 
+之后需要配置反向代理，以下提供 Nginx 配置参考：  
+```conf
+server {
+    listen 80;
+    listen [::]:80;
+    server_name $SERVER_NAME;
+    return 301 https://$host$request_uri;
+}
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
+    server_name $SERVER_NAME;
+    ssl_certificate $PATH_TO_CERTIFICATE;
+    ssl_certificate_key $PATH_TO_KEY;
+    location / {
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-Host $http_host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_pass http://localhost:8000;
+        proxy_http_version 1.1;
+    }
+}
+```
+
 ### 前端
 
 **Android**
