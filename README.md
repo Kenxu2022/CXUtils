@@ -16,6 +16,7 @@
 docker pull kenxu2022/cxutils:latest
 docker run -d -p 8000:8000 \
   --name cxutils \
+  -v cxutils_db:/cxutils/db \
   -e USERNAME=$USERNAME \
   -e PASSWORD=$PASSWORD \
   -e SECERT_KEY=$SECRET_KEY \
