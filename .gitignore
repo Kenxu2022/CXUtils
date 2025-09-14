@@ -1,3 +1,3 @@
 __pycache__
-data.db
+db/data.db
 config.ini

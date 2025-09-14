@@ -4,7 +4,7 @@ from datetime import datetime
 from loguru import logger
 
 # create table in the first run
-conn = sqlite3.connect("data.db")
+conn = sqlite3.connect("db/data.db")
 cursor = conn.cursor()
 
 cursor.execute('''
@@ -20,7 +20,7 @@ conn.close()
 
 class DatabaseManager:
     def __enter__(self):
-        self.conn = sqlite3.connect("data.db")
+        self.conn = sqlite3.connect("db/data.db")
         self.cursor = self.conn.cursor()
         return self
 
