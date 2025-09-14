@@ -1,2 +1,8 @@
-__pycache__/
+.git
+.gitignore
+Dockerfile
+.dockerignore
+**/__pycache__/
+.vscode/
+db/data.db
 config.ini

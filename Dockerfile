@@ -1,5 +1,5 @@
 FROM python:3.12-slim
-WORKDIR /root/cxutils
+WORKDIR /cxutils
 
 COPY . .
 RUN pip config set global.index-url https://mirrors.ustc.edu.cn/pypi/simple
