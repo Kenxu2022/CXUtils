@@ -34,11 +34,11 @@ def parseCourse(data: dict):
         "data": courseList
     }
 
-def parseActivity(data: dict):
+def parseActivity(data: dict, activeType: int):
     activityList = []
     for item in data["data"]["activeList"]:
-        if item["activeType"] != 2: # skip non signin activity
-            continue     
+        if item["activeType"] != activeType:
+            continue
         startTime = time.localtime(float(item["startTime"]) / 1000)
         endTime = time.localtime(float(item["endTime"]) / 1000)
         activityList.append(parseActivityResult(
