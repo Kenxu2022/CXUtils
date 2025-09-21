@@ -20,6 +20,10 @@ class parseSignInDetailResult(BaseModel):
     type: int
     needValidation: bool
 
+class parseQuizProblemResult(BaseModel):
+    title: str
+    options: dict
+
 def parseCourse(data: dict):
     courseList = []
     for item in data["channelList"]:
@@ -48,7 +52,7 @@ def parseActivity(data: dict, activeType: int):
             active = True if item["status"] == 1 else False,
             activeID = item["id"],
             activeType = item["activeType"]
-        ))      
+        ))
     return {
         "success": True,
         "data": activityList
@@ -119,3 +123,13 @@ def parseValidateCode(data: str):
         }
     else:
         return None
+
+def parseQuizProblem(data: dict):
+    title = data["data"]["questionlist"][0]["content"][3:-4] # remove html tag
+    options = {}
+    for item in data["data"]["questionlist"][0]["answer"]:
+        options[item["name"]] = item["content"][3:-4] # remove html tag
+    return {
+        "success": True,
+        "data": parseQuizProblemResult(title = title, options = options)
+    }

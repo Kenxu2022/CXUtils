@@ -129,3 +129,17 @@ class Captcha:
         }
         response = requests.get(url = url, params = params, headers = auth_header, cookies = self.cookie)
         return response.text
+    
+class Quiz:
+    def __init__(self, cookie, activeID):
+        self.cookie = cookie
+        self.activeID = activeID
+    def getQuizProblem(self):
+        url = "https://mobilelearn.chaoxing.com/v2/apis/quiz/quizDetail2"
+        params = {
+            "activeId": self.activeID,
+            "DB_STRATEGY": "PRIMARY_KEY",
+            "STRATEGY_PARA": "activeId"
+        }
+        response = requests.get(url = url, params = params, headers = HEADER, cookies = self.cookie)
+        return json.loads(response.text)

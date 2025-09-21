@@ -8,8 +8,8 @@ import os
 
 from credentials.cookie import initializeCookie, getCookie, deleteCookie
 from auth import createToken,validateToken
-from api import ChaoxingAPI, SignIn
-from utils.parse import parseCourse, parseActivity, parseSignInDetail, parseSignIn
+from api import ChaoxingAPI, SignIn, Quiz
+from utils.parse import parseCourse, parseActivity, parseSignInDetail, parseSignIn, parseQuizProblem
 from utils.validate import generateValidateCode
 from utils.activity import decideActivityType
 
@@ -147,6 +147,16 @@ def signcodeSignIn(
     cookie = getCookie(username).get("cookie")
     result = SignIn(activeID, cookie, validate).signcodeSignIn(signCode)
     return parseSignIn(result)
+
+@app.post("/getQuizProblem")
+def getQuizProblem(
+    username: str = Body(...), 
+    activeID: str = Body(...),
+    _ = Depends(getUser)
+):
+    cookie = getCookie(username).get("cookie")
+    result = Quiz(cookie, activeID).getQuizProblem()
+    return parseQuizProblem(result)
 
 if __name__ == "__main__":
     uvicorn.run(app, host = listenIP, port = listenPort)
