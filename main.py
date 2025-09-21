@@ -4,16 +4,13 @@ import uvicorn
 from pydantic import BaseModel
 from typing import Annotated, Optional
 from configparser import ConfigParser
-from ddddocr import DdddOcr
-from loguru import logger
-import time
 import os
 
 from credentials.cookie import initializeCookie, getCookie, deleteCookie
 from auth import createToken,validateToken
-from api import ChaoxingAPI, SignIn, Captcha
-from utils.parse import parseCourse, parseActivity, parseSignInDetail, parseSignIn, parseServerTime, parseCaptchaImageUrl, parseValidateCode
-from utils.captcha import getCaptchaParam, getCoordinate
+from api import ChaoxingAPI, SignIn
+from utils.parse import parseCourse, parseActivity, parseSignInDetail, parseSignIn
+from utils.validate import generateValidateCode
 
 class Token(BaseModel):
     access_token: str
@@ -23,7 +20,6 @@ conf = ConfigParser()
 conf.read('config.ini')
 listenIP = os.getenv("LISTEN_IP", conf['API']['ListenIP'])
 listenPort = int(os.getenv("LISTEN_PORT", conf['API']['Port']))
-parseCaptcha = DdddOcr(show_ad=False, det=False, ocr=False)
 app = FastAPI(docs_url=None, redoc_url=None)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -99,30 +95,7 @@ def getValidateCode(
     _ = Depends(getUser)
 ):
     cookie = getCookie(username).get("cookie")
-    captchaInstance = Captcha(cookie, courseID, classID, activeID)
-    for i in range(4):
-        # get server time
-        serverTime = parseServerTime(captchaInstance.getServerTime())
-        # get current time
-        timestamp = int(time.time() * 1000)
-        # get parameters to obtain captcha picture
-        captchaKey, token, iv = getCaptchaParam(serverTime, timestamp)
-        # get captcha token and picture
-        captchaToken, slideImage, backgroundImage = parseCaptchaImageUrl(captchaInstance.getCaptcha(captchaKey, token, iv, timestamp))
-        # get x coordinate
-        xCoordinate = getCoordinate(parseCaptcha, captchaInstance.getImage(slideImage), captchaInstance.getImage(backgroundImage))
-        time.sleep(0.5)
-        # get validation code
-        validateCode = parseValidateCode(captchaInstance.getAuth(captchaToken, xCoordinate, iv, timestamp))
-        if validateCode:
-            logger.info("通过验证码校验")
-            return validateCode
-        logger.warning(f"未通过验证码校验，次数：第{i + 1}次")
-    logger.error("连续五次失败，终止")
-    return {
-        "success":False,
-        "code": None
-    }
+    return generateValidateCode(cookie, courseID, classID, activeID)
 
 @app.post("/normalSignIn")
 def normalSignIn(

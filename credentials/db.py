@@ -47,7 +47,7 @@ class DatabaseManager:
         self.cursor.execute("SELECT * FROM CXLogin WHERE Username = ?", (username,))
         result = self.cursor.fetchone()
         encpassword = result[1]
-        cookie = pickle.loads( result[2])
+        cookie = pickle.loads(result[2])
         addTime = int(result[3])
         return {
             'addTime': addTime,
