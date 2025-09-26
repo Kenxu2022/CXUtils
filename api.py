@@ -143,3 +143,16 @@ class Quiz:
         }
         response = requests.get(url = url, params = params, headers = HEADER, cookies = self.cookie)
         return json.loads(response.text)
+    def submitQuizProblem(self, courseID, classID, data: list):
+        url = "https://mobilelearn.chaoxing.com/v2/apis/studentQuestion/doQuestionAnswering"
+        params = {
+            "activeId": self.activeID,
+            "courseId": courseID,
+            "classId": classID,
+            "DB_STRATEGY": "PRIMARY_KEY",
+            "STRATEGY_PARA": "activeId"
+        }
+        submit_header = HEADER.copy()
+        submit_header["Content-Type"] = "application/json"
+        response = requests.post(url = url, params = params, headers = submit_header, json = data, cookies = self.cookie)
+        return json.loads(response.text)

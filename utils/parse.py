@@ -154,3 +154,15 @@ def parseQuizProblem(data: dict):
         "data": parseQuizProblemResult(title = title, type = type, options = options),
         "originalData": originalData
     }
+
+def parseSubmitResult(data: dict):
+    if data["result"] == 1:
+        return {
+            "success": True,
+            "detail": None
+        }
+    else:
+        return {
+            "success": False,
+            "detail": data["errorMsg"]
+        }

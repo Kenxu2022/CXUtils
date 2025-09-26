@@ -9,7 +9,7 @@ import os
 from credentials.cookie import initializeCookie, getCookie, deleteCookie
 from auth import createToken,validateToken
 from api import ChaoxingAPI, SignIn, Quiz
-from utils.parse import parseCourse, parseActivity, parseSignInDetail, parseSignIn, parseQuizProblem
+from utils.parse import parseCourse, parseActivity, parseSignInDetail, parseSignIn, parseQuizProblem, parseSubmitResult
 from utils.validate import generateValidateCode
 
 class Token(BaseModel):
@@ -156,6 +156,19 @@ def getQuizProblem(
     cookie = getCookie(username).get("cookie")
     result = Quiz(cookie, activeID).getQuizProblem()
     return parseQuizProblem(result)
+
+@app.post("/submitQuizProblem")
+def submitQuizProblem(
+    username: str = Body(...), 
+    courseID: str = Body(...), 
+    classID: str = Body(...), 
+    activeID: str = Body(...),
+    data: list = Body(...),
+    _ = Depends(getUser)
+):
+    cookie = getCookie(username).get("cookie")
+    result = Quiz(cookie, activeID).submitQuizProblem(courseID, classID, data)
+    return parseSubmitResult(result)
 
 if __name__ == "__main__":
     uvicorn.run(app, host = listenIP, port = listenPort)
