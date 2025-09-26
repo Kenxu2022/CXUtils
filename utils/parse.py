@@ -145,10 +145,12 @@ def parseQuizProblem(data: dict):
     """
     title = data["data"]["questionlist"][0]["content"][3:-4] # remove html tag
     type = data["data"]["questionlist"][0]["type"]
+    originalData = data["data"]["questionlist"][0]
     options = {}
     for item in data["data"]["questionlist"][0]["answer"]:
         options[item["name"]] = item["content"][3:-4] # remove html tag
     return {
         "success": True,
-        "data": parseQuizProblemResult(title = title, type = type, options = options)
+        "data": parseQuizProblemResult(title = title, type = type, options = options),
+        "originalData": originalData
     }
