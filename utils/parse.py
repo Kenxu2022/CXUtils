@@ -22,6 +22,7 @@ class parseSignInDetailResult(BaseModel):
 
 class parseQuizProblemResult(BaseModel):
     title: str
+    type: int
     options: dict
 
 def parseCourse(data: dict):
@@ -38,10 +39,20 @@ def parseCourse(data: dict):
         "data": courseList
     }
 
-def parseActivity(data: dict, activeType: int):
+def parseActivity(data: dict, activeType: list):
+    """
+    2：签到
+    4：抢答
+    5：主题讨论
+    14：问卷
+    35：分组任务
+    42：随堂练习
+    43：投票
+    45：通知
+    """
     activityList = []
     for item in data["data"]["activeList"]:
-        if item["activeType"] != activeType:
+        if item["activeType"] not in activeType:
             continue
         startTime = time.localtime(float(item["startTime"]) / 1000)
         endTime = time.localtime(float(item["endTime"]) / 1000)
@@ -125,11 +136,19 @@ def parseValidateCode(data: str):
         return None
 
 def parseQuizProblem(data: dict):
+    """
+    0：单选
+    1：多选
+    2：填空
+    4：简答
+    16：判断
+    """
     title = data["data"]["questionlist"][0]["content"][3:-4] # remove html tag
+    type = data["data"]["questionlist"][0]["type"]
     options = {}
     for item in data["data"]["questionlist"][0]["answer"]:
         options[item["name"]] = item["content"][3:-4] # remove html tag
     return {
         "success": True,
-        "data": parseQuizProblemResult(title = title, options = options)
+        "data": parseQuizProblemResult(title = title, type = type, options = options)
     }

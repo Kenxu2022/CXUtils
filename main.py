@@ -11,7 +11,6 @@ from auth import createToken,validateToken
 from api import ChaoxingAPI, SignIn, Quiz
 from utils.parse import parseCourse, parseActivity, parseSignInDetail, parseSignIn, parseQuizProblem
 from utils.validate import generateValidateCode
-from utils.activity import decideActivityType
 
 class Token(BaseModel):
     access_token: str
@@ -71,12 +70,12 @@ def getActivity(
     username: str = Body(...), 
     courseID: str = Body(...), 
     classID: str = Body(...), 
-    activityType: str = Body(...),
+    activityType: list = Body(...),
     _ = Depends(getUser)
 ):
     cookie = getCookie(username).get("cookie")
     result = ChaoxingAPI(cookie).getActivity(courseID, classID)
-    return parseActivity(result, decideActivityType(activityType))
+    return parseActivity(result, activityType)
 
 @app.post("/getSignInDetail")
 def getSignInDetail(
