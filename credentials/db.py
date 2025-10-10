@@ -26,6 +26,10 @@ class DatabaseManager:
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.conn.close()
+
+    def getUsers(self):
+        self.cursor.execute("SELECT Username FROM CXLogin")
+        return self.cursor.fetchall()
     
     def addCookie(self, username:str, encpassword:str, cookie):
         cookie = pickle.dumps(cookie)
@@ -41,7 +45,7 @@ class DatabaseManager:
                 INSERT INTO CXLogin (Username, Encpassword, Cookie, Time) VALUES (?, ?, ?, ?)
             ''', (username, encpassword, cookie, currentTime))
         self.conn.commit()
-        logger.info("信息已添加至数据库")
+        logger.info(f"用户{username}信息已添加至数据库")
 
     def getCookie(self, username: str):
         self.cursor.execute("SELECT * FROM CXLogin WHERE Username = ?", (username,))
