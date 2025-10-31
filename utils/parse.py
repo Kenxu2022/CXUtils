@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Optional
 import time
 import json
 
@@ -23,7 +24,7 @@ class parseSignInDetailResult(BaseModel):
 class parseQuizProblemResult(BaseModel):
     title: str
     type: int
-    options: dict
+    options: Optional[dict]
 
 def parseCourse(data: dict):
     courseList = []
@@ -146,9 +147,12 @@ def parseQuizProblem(data: dict):
     title = data["data"]["questionlist"][0]["content"][3:-4] # remove html tag
     type = data["data"]["questionlist"][0]["type"]
     originalData = data["data"]["questionlist"][0]
-    options = {}
-    for item in data["data"]["questionlist"][0]["answer"]:
-        options[item["name"]] = item["content"][3:-4] # remove html tag
+    if not data["data"]["questionlist"][0]["answer"][0]:
+        options = None
+    else:
+        options = {}
+        for item in data["data"]["questionlist"][0]["answer"]:
+            options[item["name"]] = item["content"][3:-4] # remove html tag
     return {
         "success": True,
         "data": parseQuizProblemResult(title = title, type = type, options = options),
