@@ -95,9 +95,10 @@ def parseSignIn(data: str):
                     "detail": None
                 }
             else:
-                {
+                errorMessage = data['errorMsg']
+                return {
                     "success": False,
-                    "detail": data
+                    "detail": errorMessage
                 }
         except:
             return {
