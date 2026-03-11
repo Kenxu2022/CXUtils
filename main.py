@@ -128,11 +128,14 @@ def qrcodeSignIn(
     username: str = Body(...), 
     activeID: str = Body(...),
     enc: str = Body(...),
+    locationText: Optional[str] = Body(""),
+    locationLatitude: Optional[str] = Body(""),
+    locationLongitude: Optional[str] = Body(""),
     validate: Optional[str] = Body(""),
     _ = Depends(getUser)
 ):
     cookie = getCookie(username).get("cookie")
-    result = SignIn(activeID, cookie, validate).qrcodeSignIn(enc)
+    result = SignIn(activeID, cookie, validate).qrcodeSignIn(enc, locationText, locationLatitude, locationLongitude)
     return parseSignIn(result)
 
 @app.post("/signcodeSignIn")

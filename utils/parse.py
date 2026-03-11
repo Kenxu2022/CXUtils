@@ -73,7 +73,8 @@ def parseActivity(data: dict, activeType: list):
 def parseSignInDetail(data: dict):
     signInDetail = {
         "type": data['data']['otherId'], # 0-normal, 2-QRCode, 3-gesture, 4-location, 5-signcode
-        "needValidation": True if data['data']['ifNeedVCode'] == 1 else False
+        "needValidation": True if data['data']['ifNeedVCode'] == 1 else False,
+        "needLocation": True if data['data']['locationText'] else False
     }
     return {
         "success": True,

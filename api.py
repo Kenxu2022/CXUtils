@@ -48,8 +48,20 @@ class SignIn:
         url = f"https://mobilelearn.chaoxing.com/pptSign/stuSignajax?address={locationText}&activeId={self.activeId}&latitude={locationLatitude}&longitude={locationLongitude}&validate={self.validate}&fid=0&appType=15&ifTiJiao=1"
         response = requests.get(url, headers = HEADER, cookies = self.cookie)
         return response.text
-    def qrcodeSignIn(self, enc):
-        url = f"https://mobilelearn.chaoxing.com/pptSign/stuSignajax?activeId={self.activeId}&enc={enc}&validate={self.validate}&fid=0"
+    def qrcodeSignIn(self, enc, locationText = "", locationLatitude = "", locationLongitude = ""):
+        if all([locationText, locationLatitude, locationLongitude]):
+            locationData = {
+                "result": "1",
+                "address": locationText,
+                "longitude": locationLongitude,
+                "mockData": {
+                    "probability": 0
+                },
+                "latitude": locationLatitude,
+            }
+            url = f"https://mobilelearn.chaoxing.com/pptSign/stuSignajax?activeId={self.activeId}&enc={enc}&validate={self.validate}&location={locationData}&fid=0"
+        else:
+            url = f"https://mobilelearn.chaoxing.com/pptSign/stuSignajax?activeId={self.activeId}&enc={enc}&validate={self.validate}&fid=0"
         response = requests.get(url, headers = HEADER, cookies = self.cookie)
         return response.text
     def signcodeSignIn(self, signcode):
