@@ -25,6 +25,7 @@ class parseQuizProblemResult(BaseModel):
     title: str
     type: int
     options: Optional[dict]
+    resourceUrl: Optional[list]
 
 def parseCourse(data: dict):
     courseList = []
@@ -146,19 +147,29 @@ def parseQuizProblem(data: dict):
     4：简答
     16：判断
     """
-    title = data["data"]["questionlist"][0]["content"][3:-4] # remove html tag
-    type = data["data"]["questionlist"][0]["type"]
-    originalData = data["data"]["questionlist"][0]
-    if not data["data"]["questionlist"][0]["answer"][0]:
-        options = None
-    else:
-        options = {}
-        for item in data["data"]["questionlist"][0]["answer"]:
-            options[item["name"]] = item["content"][3:-4] # remove html tag
+    quizList = []
+    originalDataList = []
+    for originalData in data["data"]["questionlist"]:
+        title = originalData["content"][3:-4] # remove html tag
+        type = originalData["type"]
+        if not originalData["answer"][0]:
+            options = None
+        else:
+            options = {}
+            for item in originalData["answer"]:
+                options[item["name"]] = item["content"][3:-4] if type in (0, 1) else item["content"] # remove html tag if necessary
+        if not originalData["recArray"]:
+            resourceUrl = None
+        else:
+            resourceUrl = []
+            for urlData in originalData["recArray"]:
+                resourceUrl.append(f"https://p.cldisk.com/star4/{urlData['objectid']}/origin.jpg")
+        quizList.append(parseQuizProblemResult(title = title, type = type, options = options, resourceUrl = resourceUrl))
+        originalDataList.append(originalData)
     return {
         "success": True,
-        "data": parseQuizProblemResult(title = title, type = type, options = options),
-        "originalData": originalData
+        "data": quizList,
+        "originalData": originalDataList
     }
 
 def parseSubmitResult(data: dict):
