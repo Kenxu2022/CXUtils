@@ -27,6 +27,17 @@ class parseQuizProblemResult(BaseModel):
     options: Optional[dict]
     resourceUrl: Optional[list]
 
+class parseDiscussionResult(BaseModel):
+    content: str
+    publicURL: str
+    uuid: str
+    bbsid: str
+
+class parseReplyResult(BaseModel):
+    floor: str
+    name: str
+    content: str
+
 def parseCourse(data: dict):
     courseList = []
     for item in data["channelList"]:
@@ -182,4 +193,40 @@ def parseSubmitResult(data: dict):
         return {
             "success": False,
             "detail": data["errorMsg"]
+        }
+
+def parseDiscussion(data: dict):
+    content = data['datas']['text_content']
+    publicURL = data['datas']['shareUrl']
+    uuid = data['datas']['uuid']
+    bbsid = data['datas']['bbsid']
+    return {
+        "success": True,
+        "data": parseDiscussionResult(content = content, publicURL = publicURL, uuid = uuid, bbsid = bbsid)
+    }
+
+def parseReply(data: dict):
+    replyList = []
+    for r in data["data"]["datas"]:
+        replyFloor = r['floor']
+        replyName = r['creater_name']
+        replyContent = r['content'].strip()
+        replyList.append(parseReplyResult(floor = replyFloor, name = replyName, content = replyContent))
+    return {
+        "success": True,
+        "data": replyList
+    }
+
+def parseReplyResponse(data: dict):
+    replyStatus = data['status']
+    serverMessage = data['msg']
+    if replyStatus:
+        return {
+            "success": True,
+            "data": None
+        }
+    else:
+        return {
+            "success": False,
+            "data": serverMessage
         }

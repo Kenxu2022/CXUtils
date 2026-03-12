@@ -8,8 +8,8 @@ import os
 
 from credentials.cookie import initializeCookie, getCookie, deleteCookie
 from auth import createToken,validateToken
-from api import ChaoxingAPI, SignIn, Quiz
-from utils.parse import parseCourse, parseActivity, parseSignInDetail, parseSignIn, parseQuizProblem, parseSubmitResult
+from api import ChaoxingAPI, SignIn, Quiz, Discussion
+from utils.parse import parseCourse, parseActivity, parseSignInDetail, parseSignIn, parseQuizProblem, parseSubmitResult, parseDiscussion, parseReply, parseReplyResponse
 from utils.validate import generateValidateCode
 
 class Token(BaseModel):
@@ -172,6 +172,41 @@ def submitQuizProblem(
     cookie = getCookie(username).get("cookie")
     result = Quiz(cookie, activeID).submitQuizProblem(courseID, classID, data)
     return parseSubmitResult(result)
+
+@app.post("/getDiscussion")
+def getDiscussion(
+    username: str = Body(...), 
+    activeID: str = Body(...),
+    _ = Depends(getUser)
+):
+    cookie = getCookie(username).get("cookie")
+    result = Discussion(cookie).getDiscussion(activeID)
+    return parseDiscussion(result)
+
+@app.post("/getReply")
+def getReply(
+    username: str = Body(...), 
+    uuid: str = Body(...), 
+    bbsid: str = Body(...),
+    _ = Depends(getUser)
+):
+    cookie = getCookie(username).get("cookie")
+    result = Discussion(cookie).getReply(uuid, bbsid)
+    return parseReply(result)
+
+@app.post("/submitReply")
+def submitReply(
+    username: str = Body(...), 
+    courseID: str = Body(...),
+    classID: str = Body(...),
+    uuid: str = Body(...), 
+    bbsid: str = Body(...),
+    content: str = Body(...),
+    _ = Depends(getUser)
+):
+    cookie = getCookie(username).get("cookie")
+    result = Discussion(cookie).submitReply(uuid, courseID, classID, content, bbsid)
+    return parseReplyResponse(result)
 
 if __name__ == "__main__":
     uvicorn.run(app, host = listenIP, port = listenPort)

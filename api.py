@@ -1,5 +1,8 @@
 import requests
 import json
+import re
+from uuid import uuid4
+from urllib.parse import quote
 
 from utils.captcha import CAPTCHA_ID
 
@@ -167,4 +170,48 @@ class Quiz:
         submit_header = HEADER.copy()
         submit_header["Content-Type"] = "application/json"
         response = requests.post(url = url, params = params, headers = submit_header, json = data, cookies = self.cookie)
+        return response.json()
+
+class Discussion:
+    def __init__(self, cookie):
+        self.cookie = cookie
+    def getDiscussion(self, activeId: str):
+        def _getUUID():
+            url = "https://mobilelearn.chaoxing.com/v2/apis/discuss/getTopicDiscussInfo"
+            data = {
+                'activeId': activeId
+            }
+            response = requests.get(url, headers = HEADER, params = data, cookies = self.cookie)
+            return response.json()['data']['uuid']
+        url = f"https://groupweb.chaoxing.com/course/topicDiscuss/{_getUUID()}/getTopic"
+        response = requests.get(url, headers = HEADER, cookies = self.cookie)
+        return response.json()
+    def getReply(self, uuid: str, bbsid: str):
+        url = f"https://sharewh1.xuexi365.com/share/topic/{bbsid}/{uuid}/replys.json"
+        response = requests.get(url, headers = HEADER, cookies = self.cookie)
+        return response.json()
+    def submitReply(self, uuid: str, courseId: str, classId: str, content: str, bbsid: str):
+        def _getURLToken(uuid: str):
+            url = "https://groupweb.chaoxing.com/course/topicDiscuss/info"
+            data = {
+                'uuid': uuid
+            }
+            response = requests.get(url, headers = HEADER, params = data, cookies = self.cookie)
+            htmlContent = response.text
+            pattern = r"urlToken:'([^']+)'"
+            urlToken = re.search(pattern, htmlContent).group(1)
+            return urlToken
+        
+        url = f"https://groupweb.chaoxing.com/pc/invitation/{uuid}/addReplys"
+        data = {
+            'courseId': courseId,
+            'classId': classId,
+            'replyId': -1,
+            'uuid': uuid4(),
+            'topic_content': quote(content),
+            'urlToken': _getURLToken(uuid),
+            'bbsid': bbsid,
+            'anonymous': ""
+        }
+        response = requests.post(url, headers = HEADER, data = data, cookies = self.cookie)
         return response.json()
