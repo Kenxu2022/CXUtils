@@ -38,6 +38,15 @@ class parseReplyResult(BaseModel):
     name: str
     content: str
 
+def parseUsers(data: list):
+    userList = []
+    for item in data:
+        userList.append(item[0])
+    return {
+        "success": True,
+        "data": userList
+    }
+
 def parseCourse(data: dict):
     courseList = []
     for item in data["channelList"]:

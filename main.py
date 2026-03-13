@@ -7,9 +7,10 @@ from configparser import ConfigParser
 import os
 
 from credentials.cookie import initializeCookie, getCookie, deleteCookie
+from credentials.db import DatabaseManager
 from auth import createToken,validateToken
 from api import ChaoxingAPI, SignIn, Quiz, Discussion
-from utils.parse import parseCourse, parseActivity, parseSignInDetail, parseSignIn, parseQuizProblem, parseSubmitResult, parseDiscussion, parseReply, parseReplyResponse
+from utils.parse import parseUsers, parseCourse, parseActivity, parseSignInDetail, parseSignIn, parseQuizProblem, parseSubmitResult, parseDiscussion, parseReply, parseReplyResponse
 from utils.validate import generateValidateCode
 
 class Token(BaseModel):
@@ -20,6 +21,7 @@ conf = ConfigParser()
 conf.read('config.ini')
 listenIP = os.getenv("LISTEN_IP", conf['API']['ListenIP'])
 listenPort = int(os.getenv("LISTEN_PORT", conf['API']['Port']))
+allowUserSync = os.getenv("ALLOW_USER_SYNC", conf['API']['AllowUserSync']).lower() == "true"
 app = FastAPI(docs_url=None, redoc_url=None)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -58,6 +60,17 @@ def addCredential(username: str = Body(...), password: str = Body(...), _ = Depe
 def deleteCredential(username: str = Body(..., embed=True), _ = Depends(getUser)):
     result = deleteCookie(username)
     return result
+
+@app.post("/syncUsers")
+def syncUsers(_ = Depends(getUser)):
+    if not allowUserSync:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User synchronization is disabled",
+        )
+    with DatabaseManager() as db:
+        users = db.getUsers()
+    return parseUsers(users)
 
 @app.post("/getCourse")
 def getCourse(username: str = Body(..., embed=True), _ = Depends(getUser)):
