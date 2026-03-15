@@ -20,9 +20,10 @@ choice = int(input("1-刷新Cookie 2-删除账号，请选择操作："))
 if choice == 1:
     for num in accountNumber:
         username = result[num][0]
+        nickname = result[num][1]
         with DatabaseManager() as dbManager:
             encpassword = dbManager.getCookie(username)['encpassword']
-        initializeCookie(username, encpassword, True)
+        initializeCookie(username, encpassword, nickname, True)
 elif choice == 2:
     for num in accountNumber:
         username = result[num][0]
