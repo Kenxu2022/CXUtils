@@ -41,6 +41,8 @@ class parseReplyResult(BaseModel):
 def parseCourse(data: dict):
     courseList = []
     for item in data["channelList"]:
+        if item["content"].get("course") is None:
+            continue
         courseList.append(parseCourseResult(
             name = item["content"]["course"]["data"][0]["name"], 
             teacher = item["content"]["course"]["data"][0]["teacherfactor"], 
