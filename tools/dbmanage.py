@@ -8,10 +8,10 @@ with DatabaseManager() as dbManager:
     result = dbManager.getUsers()
 
 userTable = PrettyTable()
-userTable.field_names = ["序号", "账号"]
+userTable.field_names = ["序号", "账号", "昵称"]
 seq = 0
 for item in result:
-    userTable.add_row([seq, item[0]])
+    userTable.add_row([seq, item[0], item[1]])
     seq = seq + 1
 print(userTable)
 accountNumber = map(int, input("选择要操作的账号，多个账号请用英文逗号隔开：").split(","))

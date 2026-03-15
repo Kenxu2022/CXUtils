@@ -12,7 +12,8 @@ cursor.execute('''
         Username TEXT PRIMARY KEY,
         Encpassword TEXT NOT NULL,
         Cookie BLOB NOT NULL,
-        Time TEXT NOT NULL
+        Time TEXT NOT NULL,
+        Nickname TEXT NOT NULL DEFAULT ''
     )
     ''')
 conn.commit()
@@ -28,22 +29,22 @@ class DatabaseManager:
         self.conn.close()
 
     def getUsers(self):
-        self.cursor.execute("SELECT Username FROM CXLogin")
+        self.cursor.execute("SELECT Username, Nickname FROM CXLogin")
         return self.cursor.fetchall()
     
-    def addCookie(self, username:str, encpassword:str, cookie):
+    def addCookie(self, username:str, encpassword:str, cookie, nickname: str):
         cookie = pickle.dumps(cookie)
         self.cursor.execute("SELECT * FROM CXLogin WHERE Username = ?", (username,))
         result = self.cursor.fetchone()
         currentTime = round(datetime.now().timestamp())
         if result is not None:
             self.cursor.execute('''
-                UPDATE CXLogin SET Encpassword = ?, Cookie = ?, Time = ? WHERE Username = ?
-            ''', (encpassword, cookie, currentTime, username))
+                UPDATE CXLogin SET Encpassword = ?, Cookie = ?, Time = ?, Nickname = ? WHERE Username = ?
+            ''', (encpassword, cookie, currentTime, nickname, username))
         else:
             self.cursor.execute('''
-                INSERT INTO CXLogin (Username, Encpassword, Cookie, Time) VALUES (?, ?, ?, ?)
-            ''', (username, encpassword, cookie, currentTime))
+                INSERT INTO CXLogin (Username, Encpassword, Cookie, Time, Nickname) VALUES (?, ?, ?, ?, ?)
+            ''', (username, encpassword, cookie, currentTime, nickname))
         self.conn.commit()
         logger.info(f"用户{username}信息已添加至数据库")
 
@@ -58,6 +59,11 @@ class DatabaseManager:
             'cookie': cookie,
             'encpassword': encpassword
         }
+    
+    def updateNickname(self, username: str, nickname: str):
+        self.cursor.execute("UPDATE CXLogin SET Nickname = ? WHERE Username = ?", (nickname, username))
+        self.conn.commit()
+        logger.info(f"用户{username}的昵称已更新为'{nickname}'")
     
     def deleteCookie(self, username: str):
         self.cursor.execute("DELETE FROM CXLogin WHERE Username = ?", (username,))

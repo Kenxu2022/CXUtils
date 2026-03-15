@@ -24,7 +24,7 @@ LOGIN_HEADER = {
 LOGIN_URL = "https://passport2.chaoxing.com/fanyalogin"
 
 
-def initializeCookie(username: str, password: str, isPasswordEncrypted: bool):
+def initializeCookie(username: str, password: str, nickname: str, isPasswordEncrypted: bool):
     password = password if isPasswordEncrypted else loginEncrypt(password)
     data = {
         'fid': -1,
@@ -46,7 +46,7 @@ def initializeCookie(username: str, password: str, isPasswordEncrypted: bool):
         logger.info("登录成功！")
         cookie = response.cookies
         with DatabaseManager() as dbManager:
-            dbManager.addCookie(username, password, cookie)
+            dbManager.addCookie(username, password, cookie, nickname)
         return {
             'success': True,
             'cookie': cookie,
