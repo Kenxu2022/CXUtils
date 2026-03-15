@@ -11,5 +11,7 @@ if os.path.exists("db/data.db"):
             ALTER TABLE CXLogin ADD COLUMN Nickname TEXT NOT NULL DEFAULT ''
         ''')
         conn.commit()
+        print("Database schema updated.")
+    else:
+        print("Database schema is up to date.")
     conn.close()
-    
