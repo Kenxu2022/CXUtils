@@ -10,7 +10,7 @@ from credentials.cookie import initializeCookie, getCookie, deleteCookie
 from credentials.db import DatabaseManager
 from auth import createToken,validateToken
 from api import ChaoxingAPI, SignIn, Quiz, Discussion
-from utils.parse import parseUsers, parseCourse, parseActivity, parseSignInDetail, parseSignIn, parseQuizProblem, parseSubmitResult, parseDiscussion, parseReply, parseReplyResponse
+from utils.parse import parseCourse, parseActivity, parseSignInDetail, parseSignIn, parseQuizProblem, parseSubmitResult, parseDiscussion, parseReply, parseReplyResponse
 from utils.validate import generateValidateCode
 
 class Token(BaseModel):
@@ -51,8 +51,8 @@ def userAuth(credential: Annotated[OAuth2PasswordRequestForm, Depends()]):
         )
 
 @app.post("/addCredential")
-def addCredential(username: str = Body(...), password: str = Body(...), _ = Depends(getUser)):
-    result = initializeCookie(username, password, False)
+def addCredential(username: str = Body(...), password: str = Body(...), nickname: str = Body(...), _ = Depends(getUser)):
+    result = initializeCookie(username, password, nickname, False)
     result.pop('cookie')
     return result
 
@@ -70,7 +70,19 @@ def syncUsers(_ = Depends(getUser)):
         )
     with DatabaseManager() as db:
         users = db.getUsers()
-    return parseUsers(users)
+    return {
+        "success": True,
+        "data": users
+    }
+
+@app.post("/updateNickname")
+def updateNickname(username: str = Body(...), nickname: str = Body(...), _ = Depends(getUser)):
+    with DatabaseManager() as db:
+        db.updateNickname(username, nickname)
+    return {
+        "success": True,
+        "detail": None
+    }
 
 @app.post("/getCourse")
 def getCourse(username: str = Body(..., embed=True), _ = Depends(getUser)):
