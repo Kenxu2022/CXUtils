@@ -30,7 +30,7 @@ async def getUser(token: Annotated[str, Depends(oauth2_scheme)]):
     if not user:
         raise HTTPException(
             status_code = status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token",
+            detail="令牌无效，请尝试重启应用/刷新网页，或检查后端用户名/密码是否被修改",
             headers={"WWW-Authenticate": "Bearer"},
         )
     return user
@@ -46,7 +46,7 @@ def userAuth(credential: Annotated[OAuth2PasswordRequestForm, Depends()]):
     else:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid username or password",
+            detail="用户名或密码错误",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -66,7 +66,7 @@ def syncUsers(_ = Depends(getUser)):
     if not allowUserSync:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="User synchronization is disabled",
+            detail="账户同步功能被禁用，请修改后端配置文件或咨询管理员",
         )
     with DatabaseManager() as db:
         users = db.getUsers()
