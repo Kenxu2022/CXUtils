@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException, status, Body
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
+from fastapi.responses import JSONResponse
 import uvicorn
 from pydantic import BaseModel
 from typing import Annotated, Optional
@@ -64,9 +65,12 @@ def deleteCredential(username: str = Body(..., embed=True), _ = Depends(getUser)
 @app.post("/syncUsers")
 def syncUsers(_ = Depends(getUser)):
     if not allowUserSync:
-        raise HTTPException(
+        return JSONResponse(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="User synchronization is disabled",
+            content={
+                "success": False,
+                "data": "账户同步功能被禁用，请修改后端配置文件或咨询管理员。"
+            }
         )
     with DatabaseManager() as db:
         users = db.getUsers()
