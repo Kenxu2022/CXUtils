@@ -4,3 +4,4 @@ pycryptodome
 fastapi[standard]
 pyjwt
 ddddocr==1.5.6
+prettytable
