@@ -25,7 +25,13 @@ docker run -d -p 8000:8000 \
   -e SECERT_KEY=$SECRET_KEY \
   kenxu2022/cxutils:latest
 ```
-自行设置`USERNAME`，`PASSWORD`，`SECERT_KEY`变量
+**环境变量优先级高于配置文件**，可供设置的变量列表：
+|项目|说明|
+|:---|:---|
+|`USERNAME`|后端用户名|
+|`PASSWORD`|后端密码|
+|`SECERT_KEY`|用于生成访问令牌的密钥，若发生变化，则需重启前端应用，默认随机生成|
+|`ALLOW_USER_SYNC`|是否开启用户列表同步功能，默认为否|
 
 **方法二：手动运行**
 
