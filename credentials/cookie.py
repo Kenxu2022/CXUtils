@@ -67,7 +67,8 @@ def getCookie(username: str):
     else:
         logger.info("Cookie添加超过7天，刷新中")
         encpassword = result['encpassword']
-        return initializeCookie(username, encpassword, True)
+        nickname = result['nickname']
+        return initializeCookie(username, encpassword, nickname, True)
     
 def deleteCookie(username: str):
     with DatabaseManager() as dbManager:

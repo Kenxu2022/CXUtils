@@ -54,10 +54,12 @@ class DatabaseManager:
         encpassword = result[1]
         cookie = pickle.loads(result[2])
         addTime = int(result[3])
+        nickname = result[4]
         return {
             'addTime': addTime,
             'cookie': cookie,
-            'encpassword': encpassword
+            'encpassword': encpassword,
+            'nickname': nickname
         }
     
     def updateNickname(self, username: str, nickname: str):
