@@ -40,6 +40,11 @@ class parseReplyResult(BaseModel):
 
 def parseCourse(data: dict):
     courseList = []
+    if data["result"] == 0:
+        return {
+            "success": False,
+            "data": data["msg"]
+        }
     for item in data["channelList"]:
         if item["content"].get("course") is None:
             continue
