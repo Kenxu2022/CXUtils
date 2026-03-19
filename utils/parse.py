@@ -264,3 +264,15 @@ def parseBuzzIn(data: dict):
         "success": True,
         "data": parseBuzzInResult(attendList = attendList, startTime = startTime, endTime = endTime, hasEnded = hasEnded, allowAnswerStuNum = allowAnswerStuNum)
     }
+
+def parseSubmitBuzzIn(data: dict):
+    if data["result"] == 1:
+        return {
+            "success": True,
+            "detail": None
+        }
+    else:
+        return {
+            "success": False,
+            "detail": data["msg"]
+        }

@@ -232,3 +232,13 @@ class BuzzIn:
         }
         response = requests.get(url, headers = HEADER, params = params, cookies = self.cookie)
         return response.json()
+    def submitBuzzIn(self):
+        url = "https://mobilelearn.chaoxing.com/v2/apis/answer/stuAnswer"
+        params = {
+            "courseId": self.courseID,
+            "classId": self.classID,
+            "activeId": self.activeID,
+            "enterAnswer": ""
+        }
+        response = requests.post(url, headers = HEADER, params = params, cookies = self.cookie)
+        return response.json()
