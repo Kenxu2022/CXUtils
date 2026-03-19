@@ -38,6 +38,17 @@ class parseReplyResult(BaseModel):
     name: str
     content: str
 
+class parseBuzzInAttendList(BaseModel):
+    name: str
+    answerTime: str
+
+class parseBuzzInResult(BaseModel):
+    attendList: list[parseBuzzInAttendList]
+    startTime: str
+    endTime: str
+    hasEnded: bool
+    allowAnswerStuNum: int
+
 def parseCourse(data: dict):
     courseList = []
     if data["result"] == 0:
@@ -237,3 +248,19 @@ def parseReplyResponse(data: dict):
             "success": False,
             "data": serverMessage
         }
+    
+def parseBuzzIn(data: dict):
+    attendList = []
+    for item in data["data"]["attendList"]:
+        name = item["name"]
+        answerTime = item["answerTime"]
+        attendList.append(parseBuzzInAttendList(name = name, answerTime = answerTime))
+    startTime = data["data"]["pptActive"]["starttimeStr"]
+    endTime = data["data"]["pptActive"]["endtimeStr"]
+    hasEnded = True if data["data"]["pptActive"]["status"] == 2 else False
+    configJson = json.loads(data["data"]["pptActive"]["configJson"])
+    allowAnswerStuNum = configJson["allowAnswerStuNum"]
+    return {
+        "success": True,
+        "data": parseBuzzInResult(attendList = attendList, startTime = startTime, endTime = endTime, hasEnded = hasEnded, allowAnswerStuNum = allowAnswerStuNum)
+    }

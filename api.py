@@ -215,3 +215,20 @@ class Discussion:
         }
         response = requests.post(url, headers = HEADER, data = data, cookies = self.cookie)
         return response.json()
+    
+class BuzzIn:
+    def __init__(self, cookie, courseID, classID, activeID):
+        self.cookie = cookie
+        self.courseID = courseID
+        self.classID = classID
+        self.activeID = activeID
+    def getBuzzIn(self):
+        url = "https://mobilelearn.chaoxing.com/v2/apis/answer/getAnswerAttendInfo"
+        params = {
+            "courseId": self.courseID,
+            "classId": self.classID,
+            "activeId": self.activeID,
+            "role": 0
+        }
+        response = requests.get(url, headers = HEADER, params = params, cookies = self.cookie)
+        return response.json()

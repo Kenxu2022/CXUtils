@@ -9,8 +9,8 @@ import os
 from credentials.cookie import initializeCookie, getCookie, deleteCookie
 from credentials.db import DatabaseManager
 from auth import createToken,validateToken
-from api import ChaoxingAPI, SignIn, Quiz, Discussion
-from utils.parse import parseCourse, parseActivity, parseSignInDetail, parseSignIn, parseQuizProblem, parseSubmitResult, parseDiscussion, parseReply, parseReplyResponse
+from api import ChaoxingAPI, SignIn, Quiz, Discussion, BuzzIn
+from utils.parse import parseCourse, parseActivity, parseSignInDetail, parseSignIn, parseQuizProblem, parseSubmitResult, parseDiscussion, parseReply, parseReplyResponse, parseBuzzIn
 from utils.validate import generateValidateCode
 
 class Token(BaseModel):
@@ -232,6 +232,18 @@ def submitReply(
     cookie = getCookie(username).get("cookie")
     result = Discussion(cookie).submitReply(uuid, courseID, classID, content, bbsid)
     return parseReplyResponse(result)
+
+@app.post("/getBuzzIn")
+def getBuzzIn(
+    username: str = Body(...), 
+    courseID: str = Body(...),
+    classID: str = Body(...),
+    activeID: str = Body(...),
+    _ = Depends(getUser)
+):
+    cookie = getCookie(username).get("cookie")
+    result = BuzzIn(cookie, courseID, classID, activeID).getBuzzIn()
+    return parseBuzzIn(result)
 
 if __name__ == "__main__":
     uvicorn.run(app, host = listenIP, port = listenPort)
