@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, status, Body
+from fastapi import FastAPI, Depends, HTTPException, status, Body, File, Form, UploadFile
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 import uvicorn
 from pydantic import BaseModel
@@ -10,7 +10,7 @@ from credentials.cookie import initializeCookie, getCookie, deleteCookie
 from credentials.db import DatabaseManager
 from auth import createToken,validateToken
 from api import ChaoxingAPI, SignIn, Quiz, Discussion, BuzzIn
-from utils.parse import parseCourse, parseActivity, parseSignInDetail, parseSignIn, parseQuizProblem, parseSubmitResult, parseDiscussion, parseReply, parseReplyResponse, parseBuzzIn, parseSubmitBuzzIn
+from utils.parse import parseCourse, parseActivity, parseUploadImage, parseSignInDetail, parseSignIn, parseQuizProblem, parseSubmitResult, parseDiscussion, parseReply, parseReplyResponse, parseBuzzIn, parseSubmitBuzzIn
 from utils.validate import generateValidateCode
 
 class Token(BaseModel):
@@ -102,6 +102,15 @@ def getActivity(
     result = ChaoxingAPI(cookie).getActivity(courseID, classID)
     return parseActivity(result, activityType)
 
+@app.post("/uploadImage")
+def uploadImage(
+    username: Annotated[str, Form(...)],
+    image: Annotated[UploadFile, File(...)],
+):
+    cookie = getCookie(username).get("cookie")
+    result = ChaoxingAPI(cookie).uploadImage(image)
+    return parseUploadImage(result)
+
 @app.post("/getSignInDetail")
 def getSignInDetail(
     username: str = Body(...), 
@@ -127,11 +136,12 @@ def getValidateCode(
 def normalSignIn(
     username: str = Body(...),
     activeID: str = Body(...),
+    objectId: Optional[str] = Body(""),
     validate: Optional[str] = Body(""),
     _ = Depends(getUser)
 ):
     cookie = getCookie(username).get("cookie")
-    result = SignIn(activeID, cookie, validate).normalSignIn()
+    result = SignIn(activeID, cookie, validate).normalSignIn(objectId)
     return parseSignIn(result)
 
 @app.post("/locationSignIn")

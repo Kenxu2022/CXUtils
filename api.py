@@ -3,6 +3,7 @@ import json
 import re
 from uuid import uuid4
 from urllib.parse import quote
+from fastapi import UploadFile
 
 from utils.captcha import CAPTCHA_ID
 
@@ -37,14 +38,34 @@ class ChaoxingAPI:
         }
         response = requests.get(url, headers = HEADER, params = data, cookies = self.cookie)
         return json.loads(response.text)
+    def uploadImage(self, imageData: UploadFile):
+        def _getUserToken():
+            url = "https://pan-yz.cldisk.com/pcuserpan/index"
+            headers = HEADER.copy()
+            headers["Content-Type"] = "text/html; charset=UTF-8"
+            response = requests.get(url, headers = headers, cookies = self.cookie)
+            token = re.search(r'const\s+_token\s*=\s*"([^"]+)"', response.text).group(1)
+            return token
+        url = "https://pan-yz.chaoxing.com/upload?_from=mobilelearn"
+        files = {
+            'file': (imageData.filename, imageData.file, imageData.content_type),
+        }
+        payload = {
+            'puid': self.cookie.get('UID'),
+            '_token': _getUserToken()
+        }
+        headers = HEADER.copy()
+        headers.pop("Content-Type", None)
+        response = requests.post(url, headers = headers, files = files, data = payload, cookies = self.cookie)
+        return response.json()
     
 class SignIn:
     def __init__(self, activeId, cookie, validate = ""):
         self.activeId = activeId
         self.cookie = cookie
         self.validate = validate
-    def normalSignIn(self):
-        url = f"https://mobilelearn.chaoxing.com/pptSign/stuSignajax?activeId={self.activeId}&validate={self.validate}"
+    def normalSignIn(self, objectId = ""):
+        url = f"https://mobilelearn.chaoxing.com/pptSign/stuSignajax?activeId={self.activeId}&validate={self.validate}&objectId={objectId}"
         response = requests.get(url, headers = HEADER, cookies = self.cookie)
         return response.text
     def locationSignIn(self, locationText, locationLatitude, locationLongitude):
