@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, status, Body, File, Form, UploadFile
+from fastapi import FastAPI, Depends, HTTPException, status, Body, File, Form, UploadFile, Response, Query
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 import uvicorn
 from pydantic import BaseModel
@@ -106,10 +106,19 @@ def getActivity(
 def uploadImage(
     username: Annotated[str, Form(...)],
     image: Annotated[UploadFile, File(...)],
+    _ = Depends(getUser)
 ):
     cookie = getCookie(username).get("cookie")
     result = ChaoxingAPI(cookie).uploadImage(image)
     return parseUploadImage(result)
+
+@app.get("/relayImage")
+def relayImage(
+    imageUrl: str = Query(...),
+    _ = Depends(getUser)
+):
+    image_bytes = ChaoxingAPI.relayImage(imageUrl)
+    return Response(content=image_bytes)
 
 @app.post("/getSignInDetail")
 def getSignInDetail(

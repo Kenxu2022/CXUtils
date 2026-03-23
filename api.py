@@ -58,6 +58,10 @@ class ChaoxingAPI:
         headers.pop("Content-Type", None)
         response = requests.post(url, headers = headers, files = files, data = payload, cookies = self.cookie)
         return response.json()
+    @staticmethod
+    def relayImage(imageUrl: str):
+        response = requests.get(imageUrl, headers={"User-Agent": HEADER["User-Agent"]})
+        return response.content
     
 class SignIn:
     def __init__(self, activeId, cookie, validate = ""):
