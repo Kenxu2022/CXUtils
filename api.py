@@ -69,12 +69,27 @@ class SignIn:
         self.cookie = cookie
         self.validate = validate
     def normalSignIn(self, objectId = ""):
-        url = f"https://mobilelearn.chaoxing.com/pptSign/stuSignajax?activeId={self.activeId}&validate={self.validate}&objectId={objectId}"
-        response = requests.get(url, headers = HEADER, cookies = self.cookie)
+        url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"
+        params = {
+            "activeId": self.activeId,
+            "validate": self.validate,
+            "objectId": objectId
+        }
+        response = requests.get(url, headers = HEADER, params = params, cookies = self.cookie)
         return response.text
     def locationSignIn(self, locationText, locationLatitude, locationLongitude):
-        url = f"https://mobilelearn.chaoxing.com/pptSign/stuSignajax?address={locationText}&activeId={self.activeId}&latitude={locationLatitude}&longitude={locationLongitude}&validate={self.validate}&fid=0&appType=15&ifTiJiao=1"
-        response = requests.get(url, headers = HEADER, cookies = self.cookie)
+        url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"
+        params = {
+            "address": locationText,
+            "activeId": self.activeId,
+            "latitude": locationLatitude,
+            "longitude": locationLongitude,
+            "validate": self.validate,
+            "fid": 0,
+            "appType": 15,
+            "ifTiJiao": 1
+        }
+        response = requests.get(url, headers = HEADER, params = params, cookies = self.cookie)
         return response.text
     def qrcodeSignIn(self, enc, locationText = "", locationLatitude = "", locationLongitude = ""):
         if all([locationText, locationLatitude, locationLongitude]):
@@ -87,18 +102,39 @@ class SignIn:
                 },
                 "latitude": locationLatitude,
             }
-            url = f"https://mobilelearn.chaoxing.com/pptSign/stuSignajax?activeId={self.activeId}&enc={enc}&validate={self.validate}&location={locationData}&fid=0"
+            params = {
+                "activeId": self.activeId,
+                "enc": enc,
+                "validate": self.validate,
+                "location": json.dumps(locationData),
+                "fid": 0
+            }
         else:
-            url = f"https://mobilelearn.chaoxing.com/pptSign/stuSignajax?activeId={self.activeId}&enc={enc}&validate={self.validate}&fid=0"
-        response = requests.get(url, headers = HEADER, cookies = self.cookie)
+            params = {
+                "activeId": self.activeId,
+                "enc": enc,
+                "validate": self.validate,
+                "fid": 0
+            }
+        url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"
+        response = requests.get(url, headers = HEADER, params = params, cookies = self.cookie)
         return response.text
     def signcodeSignIn(self, signcode):
-        url = f"https://mobilelearn.chaoxing.com/v2/apis/sign/signIn?activeId={self.activeId}&signCode={signcode}&validate={self.validate}&moreClassAttendEnc="
-        response = requests.get(url, headers = HEADER, cookies = self.cookie)
+        url = "https://mobilelearn.chaoxing.com/v2/apis/sign/signIn"
+        params = {
+            "activeId": self.activeId,
+            "signCode": signcode,
+            "validate": self.validate,
+            "moreClassAttendEnc": ""
+        }
+        response = requests.get(url, headers = HEADER, params = params, cookies = self.cookie)
         return response.text
     def getMiscInfo(self):
-        url = f"https://mobilelearn.chaoxing.com/v2/apis/active/getPPTActiveInfo?activeId={self.activeId}"
-        response = requests.get(url, headers = HEADER, cookies = self.cookie)
+        url = "https://mobilelearn.chaoxing.com/v2/apis/active/getPPTActiveInfo"
+        params = {
+            "activeId": self.activeId
+        }
+        response = requests.get(url, headers = HEADER, params = params, cookies = self.cookie)
         return json.loads(response.text)
     
 class Captcha:
@@ -108,7 +144,7 @@ class Captcha:
         self.classID = classID
         self.activeID = activeID
     def getServerTime(self):
-        url = f"https://captcha.chaoxing.com/captcha/get/conf"
+        url = "https://captcha.chaoxing.com/captcha/get/conf"
         params = {
                 "callback": "cx_captcha_function",
                 "captchaId": CAPTCHA_ID
